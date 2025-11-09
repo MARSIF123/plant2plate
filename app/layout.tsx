@@ -4,16 +4,17 @@ import "./globals.css";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const font = Inter({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
 });
+
 export const metadata: Metadata = {
-  title:
-    "Junk Removal | Santa Clarita • Los Angeles • Antelope • Orange County | Goodbye Junk",
+  title: "PlantToPlate | Fresh Local Produce",
   description:
-    "Same-day junk removal made easy. Goodbye Junk offers fast, affordable, and friendly service across Southern California. Call, text, or upload photos 24/7 for your free quote!",
+    "Connect directly with local farmers and enjoy fresh, sustainable, and nutrient-rich products.",
 };
 
 export default function RootLayout({
@@ -24,11 +25,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${font.className} antialiased`}>
-        <CartProvider>
-          <Header />
-          {children}
-          <Footer />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Header />
+            {children}
+            <Footer />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
