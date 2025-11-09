@@ -5,10 +5,9 @@ import Logo from "../../public/logo.jpg";
 import Link from "next/link";
 import { NavLinks, SITE_NAME } from "@/data/constants";
 import { HiBars3BottomRight } from "react-icons/hi2";
-import { MdContactSupport } from "react-icons/md";
-import { BiCart, BiLogInCircle } from "react-icons/bi";
+import { BiCart } from "react-icons/bi";
 import { LuLogIn } from "react-icons/lu";
-import { FaCarTunnel } from "react-icons/fa6";
+import { useCart } from "@/context/CartContext";
 
 type NavProps = {
   openNavHandler: () => void;
@@ -16,6 +15,10 @@ type NavProps = {
 
 const NavBar = ({ openNavHandler }: NavProps) => {
   const [navBg, setNavBg] = useState(false);
+  const { cart } = useCart();
+
+  // Calculate total items
+  const totalItems = Object.keys(cart).length;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,11 +68,11 @@ const NavBar = ({ openNavHandler }: NavProps) => {
         {/* Call to Action Button */}
         <div className="hidden sm:inline-flex space-x-2">
           <Link
-            href={"/cart"}
+            href={"/checkout"}
             className="px-6 py-3.5 text-sm cursor-pointer text-primary-green rounded-lg flex items-center space-x-1"
           >
             <BiCart className="w-6 h-6" />
-            <span>0</span>
+            <span>{totalItems}</span>
           </Link>
           <Link
             href={"/login"}
