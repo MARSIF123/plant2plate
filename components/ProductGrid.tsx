@@ -1,11 +1,53 @@
 "use client";
-import { products } from "@/data/products";
+import { useState } from "react";
 import { FaTrash, FaShoppingCart } from "react-icons/fa";
 import { HiHeart } from "react-icons/hi2";
-import { useCart } from "@/context/CartContext";
 
-export default function ProductGrid() {
-  const { cart, addToCart, removeFromCart, changeQuantity } = useCart();
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+  unit?: string;
+  image: string;
+};
+
+type ProductGridProps = {
+  products: Product[];
+  setProducts?: React.Dispatch<React.SetStateAction<Product[]>>; // optional for delete
+};
+
+export default function ProductGrid({
+  products,
+  setProducts,
+}: ProductGridProps) {
+  const [cart, setCart] = useState<{ [key: number]: number }>({});
+
+  const addToCart = (id: number) => {
+    setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+  };
+
+  const removeFromCart = (id: number) => {
+    setCart((prev) => {
+      const newCart = { ...prev };
+      delete newCart[id];
+      return newCart;
+    });
+    if (setProducts) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    }
+  };
+
+  const changeQuantity = (id: number, delta: number) => {
+    setCart((prev) => {
+      const newQty = (prev[id] || 0) + delta;
+      if (newQty <= 0) {
+        const newCart = { ...prev };
+        delete newCart[id];
+        return newCart;
+      }
+      return { ...prev, [id]: newQty };
+    });
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-4 grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

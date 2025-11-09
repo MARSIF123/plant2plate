@@ -2,8 +2,7 @@ import Heading from "@/components/Heading";
 import ProductGrid from "@/components/ProductGrid";
 import SearchBar from "@/components/Search/SearchBar";
 import Slider from "@/components/Slider";
-import Head from "next/head";
-import React from "react";
+import { products } from "@/data/products";
 
 const Home = () => {
   return (
@@ -11,7 +10,7 @@ const Home = () => {
       <SearchBar />
       <Slider />
       <Heading />
-      <ProductGrid />
+      <ProductGrid products={products} />
     </div>
   );
 };

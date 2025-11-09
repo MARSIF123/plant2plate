@@ -1,5 +1,6 @@
 import React from "react";
-import ProductsGrid from "../../components/ProductGrid";
+import ProductGrid from "../../components/ProductGrid";
+import { products } from "@/data/products"; // your static products array
 
 export default function ProductsPage() {
   return (
@@ -15,12 +16,9 @@ export default function ProductsPage() {
         </p>
       </section>
 
-      {/* Optional: Filter / Search Bar */}
-      {/* You can add a filter component here if needed */}
-
       {/* Products Grid */}
       <section>
-        <ProductsGrid />
+        <ProductGrid products={products} />
       </section>
     </main>
   );
