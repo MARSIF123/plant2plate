@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { ProductProvider } from "@/context/ProductContext";
+import { VendorProvider } from "@/context/VendorContext";
 
 const font = Inter({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
@@ -26,11 +29,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${font.className} antialiased`}>
         <AuthProvider>
-          <CartProvider>
-            <Header />
-            {children}
-            <Footer />
-          </CartProvider>
+          <ProductProvider>
+            <VendorProvider>
+              <CartProvider>
+                <Header />
+                {children}
+                <Footer />
+              </CartProvider>
+            </VendorProvider>
+          </ProductProvider>
         </AuthProvider>
       </body>
     </html>

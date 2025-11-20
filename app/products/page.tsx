@@ -1,4 +1,3 @@
-import React from "react";
 import ProductGrid from "../../components/ProductGrid";
 import { products } from "@/data/products"; // your static products array
 

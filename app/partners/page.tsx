@@ -1,55 +1,40 @@
-import React from "react";
+"use client";
 
-// Example partners data
-const partners = [
-  {
-    name: "Green Valley Farms",
-    logo: "/logo.jpg",
-    description: "Sustainable organic fruits and vegetables from Ontario.",
-  },
-  {
-    name: "Sunny Orchards",
-    logo: "/logo.jpg",
-    description: "Fresh seasonal fruits picked at peak ripeness.",
-  },
-  {
-    name: "NutriVeggies",
-    logo: "/logo.jpg",
-    description: "Locally grown, nutrient-rich vegetables delivered fresh.",
-  },
-];
+import { useVendors } from "@/context/VendorContext";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 
-export default function PartnersPage() {
+const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
+
+export default function VendorsPage() {
+  const { vendors } = useVendors();
+
   return (
-    <main className="min-h-screen px-6 md:px-20 py-16">
-      <section className="text-center mb-12">
-        <h1 className="text-primary-green text-4xl md:text-5xl font-bold mb-4">
-          Our Trusted Partners
-        </h1>
-        <p className="text-primary-green text-lg md:text-xl">
-          We collaborate with local farms and vendors to bring fresh,
-          high-quality produce to your plate.
-        </p>
-      </section>
+    <main className="p-4 space-y-6">
+      <h1 className="text-3xl font-bold">Nearby Vendors</h1>
 
-      <section className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {partners.map((partner) => (
-          <div
-            key={partner.name}
-            className="bg-white rounded-lg shadow-md p-6 flex flex-col items-center text-center"
-          >
-            <img
-              src={partner.logo}
-              alt={partner.name}
-              className="w-32 h-32 object-contain mb-4"
-            />
-            <h2 className="text-primary-green text-xl font-semibold mb-2">
-              {partner.name}
-            </h2>
-            <p className="text-gray-600">{partner.description}</p>
-          </div>
+      {/* Map */}
+      <MapView vendors={vendors} />
+
+      {/* List */}
+      <div className="space-y-3">
+        {vendors.map((vendor) => (
+          <Link key={vendor.id} href={`/partners/1`}>
+            <div className="p-3 border rounded-xl flex items-center gap-3 hover:bg-gray-50 cursor-pointer">
+              <img
+                src={vendor.image}
+                className="w-16 h-16 rounded-lg object-cover"
+              />
+              <div>
+                <h2 className="text-lg font-semibold">{vendor.name}</h2>
+                <p className="text-gray-500">
+                  {vendor.distance} • ⭐ {vendor.rating}
+                </p>
+              </div>
+            </div>
+          </Link>
         ))}
-      </section>
+      </div>
     </main>
   );
 }

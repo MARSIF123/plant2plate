@@ -1,9 +1,11 @@
 "use client";
+
 import { FaTrash, FaShoppingCart } from "react-icons/fa";
 import { HiHeart } from "react-icons/hi2";
 import { useCart } from "@/context/CartContext";
+import { useRouter } from "next/navigation";
 
-type Product = {
+export type Product = {
   id: number;
   name: string;
   price: number;
@@ -20,16 +22,18 @@ export default function ProductGrid({
   products,
   setProducts,
 }: ProductGridProps) {
-  // ✅ use global cart context instead of local state
   const { cart, addToCart, removeFromCart, changeQuantity } = useCart();
+  const router = useRouter();
 
   const handleRemove = (id: number) => {
     removeFromCart(id);
-
-    // if admin mode or delete-enabled
     if (setProducts) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
     }
+  };
+
+  const handleCardClick = (id: number) => {
+    router.push(`/products/${id}`);
   };
 
   return (
@@ -40,7 +44,8 @@ export default function ProductGrid({
         return (
           <div
             key={product.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
+            className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => handleCardClick(product.id)}
           >
             <div className="relative">
               <img
@@ -48,8 +53,10 @@ export default function ProductGrid({
                 alt={product.name}
                 className="w-full h-48 object-cover"
               />
-
-              <button className="absolute top-2 right-2 text-primary-green hover:text-primary-red">
+              <button
+                className="absolute top-2 right-2 text-primary-green hover:text-primary-red"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <HiHeart size={24} />
               </button>
             </div>
@@ -57,43 +64,42 @@ export default function ProductGrid({
             <div className="p-4 flex-1 flex flex-col justify-between">
               <div>
                 <h3 className="text-lg font-semibold">{product.name}</h3>
-
                 {product.unit && (
                   <p className="text-gray-500 text-sm">{product.unit}</p>
                 )}
-
                 <p className="text-green-700 font-bold mt-2">
                   ${product.price.toFixed(2)} ea.
                 </p>
               </div>
 
               {quantity === 0 ? (
-                // ADD TO CART BUTTON
                 <button
-                  onClick={() => addToCart(product.id)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // prevent navigating when clicking button
+                    addToCart(product.id);
+                  }}
                   className="mt-4 bg-primary-green hover:bg-primary-red text-white py-2 rounded flex items-center justify-center gap-2"
                 >
                   <FaShoppingCart /> Add to Cart
                 </button>
               ) : (
-                // CART QUANTITY CONTROLS
-                <div className="mt-4 flex items-center justify-between border border-gray-200 rounded px-2">
+                <div
+                  className="mt-4 flex items-center justify-between border border-gray-200 rounded px-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={() => changeQuantity(product.id, -1)}
                     className="px-2 text-lg font-bold"
                   >
                     -
                   </button>
-
                   <span>{quantity}</span>
-
                   <button
                     onClick={() => changeQuantity(product.id, 1)}
                     className="px-2 text-lg font-bold"
                   >
                     +
                   </button>
-
                   <button
                     onClick={() => handleRemove(product.id)}
                     className="text-primary-green hover:text-primary-red ml-2"

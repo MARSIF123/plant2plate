@@ -8,7 +8,7 @@ export const products = [
   },
   {
     id: 2,
-    name: "banana",
+    name: "Banana",
     price: 3.88,
     image: "/products/banana.jpg",
     unit: "2 lb",
@@ -29,7 +29,7 @@ export const products = [
   },
   {
     id: 5,
-    name: "banana",
+    name: "Banana",
     price: 3.88,
     image: "/products/banana.jpg",
     unit: "2 lb",
@@ -50,7 +50,7 @@ export const products = [
   },
   {
     id: 8,
-    name: "banana",
+    name: "Banana",
     price: 3.88,
     image: "/products/banana.jpg",
     unit: "2 lb",
