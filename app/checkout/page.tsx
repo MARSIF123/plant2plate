@@ -1,11 +1,13 @@
 "use client";
+
 import { useCart } from "@/context/CartContext";
-import { products } from "@/data/products";
+import { useProducts, Product } from "@/context/ProductContext";
 import { FaTrash } from "react-icons/fa";
 import { useState } from "react";
 
 export default function CheckoutPage() {
   const { cart, changeQuantity, removeFromCart, clearCart } = useCart();
+  const { products } = useProducts(); // <- get products from context
 
   const [userDetails, setUserDetails] = useState({
     name: "",
@@ -21,13 +23,12 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = () => {
-    // Simple validation
     if (!userDetails.name || !userDetails.email || !userDetails.address) {
       alert("Please fill in all required fields!");
       return;
     }
 
-    // Here you would send cart + userDetails to backend/payment gateway
+    // send cart + userDetails to backend/payment gateway
     alert("Order placed successfully!");
     clearCart();
     setUserDetails({
@@ -42,7 +43,7 @@ export default function CheckoutPage() {
 
   // Calculate total
   const total = Object.entries(cart).reduce((sum, [id, qty]) => {
-    const product = products.find((p) => p.id === Number(id));
+    const product = products.find((p) => p.id === Number(id)); // context products
     return product ? sum + product.price * qty : sum;
   }, 0);
 
