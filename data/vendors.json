@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "1234",
+    "farmName": "Green Valley",
+    "farmAddress": "123 Farm Road",
+    "certificate": "/certs/cert1.pdf",
+    "distance": 0,
+    "rating": 0,
+    "location": "Unknown",
+    "image": "/images/default-farm.jpg",
+    "products": [],
+    "description": "Organic farm specializing in fresh fruits."
+  }
+]

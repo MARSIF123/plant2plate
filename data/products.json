@@ -1,0 +1,50 @@
+[
+  {
+    "id": 2,
+    "name": "Banana",
+    "price": 3.88,
+    "image": "/products/banana.jpg",
+    "unit": "2 lb",
+    "vendorId": 1
+  },
+  {
+    "id": 3,
+    "name": "Carrots",
+    "price": 2.5,
+    "image": "/products/carrot.jpg",
+    "unit": "454 g",
+    "vendorId": 2
+  },
+  {
+    "id": 4,
+    "name": "Apple",
+    "price": 2.98,
+    "image": "/products/apple.avif",
+    "unit": "2 lb",
+    "vendorId": 2
+  },
+  {
+    "id": 5,
+    "name": "Banana",
+    "price": 3.88,
+    "image": "/products/banana.jpg",
+    "unit": "2 lb",
+    "vendorId": 3
+  },
+  {
+    "id": 7,
+    "name": "Apple",
+    "price": 2.967,
+    "image": "/products/apple.avif",
+    "unit": "2 lb",
+    "vendorId": 1
+  },
+  {
+    "id": 8,
+    "name": "Appleeeeee",
+    "price": 2.98,
+    "image": "/products/apple.avif",
+    "unit": "2 lb",
+    "vendorId": 1
+  }
+]

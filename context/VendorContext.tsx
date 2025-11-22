@@ -7,44 +7,62 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { vendors as dummyVendors } from "@/data/vendors";
+import vendorsDataRaw from "@/data/vendors.json";
 
-// ✅ Export Vendor type
+// Vendor type
 export type Vendor = {
   id: number;
   name: string;
-  distance: string;
-  rating: number;
-  location: { lat: number; lng: number };
-  image: string;
-  description: string;
-  products: number[]; // product IDs only
+  email: string;
+  password?: string;
+  farmName: string;
+  farmAddress: string;
+  certificate?: string;
+  distance?: number;
+  rating?: number;
+  location?: string;
+  image?: string;
+  products?: number[];
+  description?: string;
 };
 
+// Context type
 type VendorContextType = {
   vendors: Vendor[];
-  selectedVendor: Vendor | null;
   getVendorById: (id: number) => Vendor | undefined;
+  addVendor: (vendor: Omit<Vendor, "id">) => Vendor;
 };
 
 const VendorContext = createContext<VendorContextType | undefined>(undefined);
 
 export const VendorProvider = ({ children }: { children: ReactNode }) => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
   useEffect(() => {
-    setVendors(dummyVendors);
+    // safely cast JSON data to Vendor[]
+    const loadedVendors: Vendor[] = vendorsDataRaw as unknown as Vendor[];
+    setVendors(loadedVendors);
   }, []);
 
-  const getVendorById = (id: number) => {
-    const v = vendors.find((v) => v.id === Number(id));
-    setSelectedVendor(v || null);
-    return v;
+  const getVendorById = (id: number) => vendors.find((v) => v.id === id);
+
+  const addVendor = (vendor: Omit<Vendor, "id">) => {
+    const newVendor: Vendor = {
+      id: vendors.length ? Math.max(...vendors.map((v) => v.id)) + 1 : 1,
+      ...vendor,
+      products: vendor.products || [],
+      distance: vendor.distance || 0,
+      rating: vendor.rating || 0,
+      location: vendor.location || "",
+      image: vendor.image || "",
+      description: vendor.description || "",
+    };
+    setVendors((prev) => [...prev, newVendor]);
+    return newVendor;
   };
 
   return (
-    <VendorContext.Provider value={{ vendors, selectedVendor, getVendorById }}>
+    <VendorContext.Provider value={{ vendors, getVendorById, addVendor }}>
       {children}
     </VendorContext.Provider>
   );

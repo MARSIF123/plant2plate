@@ -1,13 +1,19 @@
 "use client";
-import { createContext, useContext, useState, ReactNode } from "react";
+
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import { useRouter } from "next/navigation";
+import vendorsData from "@/data/vendors.json";
 
 type User = {
   id: number;
   name: string;
   email: string;
-  role: "vendor" | "buyer";
-  password?: string;
 };
 
 type AuthContextType = {
@@ -16,38 +22,32 @@ type AuthContextType = {
   logout: () => void;
 };
 
-const users: User[] & { password: string }[] = [
-  {
-    id: 1,
-    name: "Vendor One",
-    email: "vendor@example.com",
-    password: "1234",
-    role: "vendor",
-  },
-  {
-    id: 2,
-    name: "Buyer One",
-    email: "buyer@example.com",
-    password: "1234",
-    role: "buyer",
-  },
-];
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
+  // Restore user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
   const login = (email: string, password: string) => {
-    const foundUser = users.find(
-      (u) => u.email === email && u.password === password
+    const foundUser = (vendorsData as any).find(
+      (u: any) => u.email === email && u.password === password
     );
+
     if (foundUser) {
-      setUser(foundUser);
-      // redirect based on role
-      if (foundUser.role === "vendor") router.push("/vendor/dashboard");
-      else router.push("/");
+      const { id, name, email: userEmail, role } = foundUser;
+      const userData = { id, name, email: userEmail, role };
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData)); // persist in localStorage
+
+      router.push("/vendor/dashboard"); // buyer redirect
       return true;
     }
     return false;
@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem("user"); // clear storage
     router.push("/login");
   };
 

@@ -4,14 +4,7 @@ import { FaTrash, FaShoppingCart } from "react-icons/fa";
 import { HiHeart } from "react-icons/hi2";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
-
-export type Product = {
-  id: number;
-  name: string;
-  price: number;
-  unit?: string;
-  image: string;
-};
+import { Product } from "@/context/ProductContext"; // <-- import Product type from context
 
 type ProductGridProps = {
   products: Product[];
@@ -75,7 +68,7 @@ export default function ProductGrid({
               {quantity === 0 ? (
                 <button
                   onClick={(e) => {
-                    e.stopPropagation(); // prevent navigating when clicking button
+                    e.stopPropagation();
                     addToCart(product.id);
                   }}
                   className="mt-4 bg-primary-green hover:bg-primary-red text-white py-2 rounded flex items-center justify-center gap-2"
