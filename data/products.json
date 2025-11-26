@@ -4,8 +4,8 @@
     "name": "Banana",
     "price": 3.88,
     "image": "/products/banana.jpg",
-    "unit": "2 lb",
-    "vendorId": 1
+    "unit": "21 lb",
+    "vendorId": 3
   },
   {
     "id": 3,
@@ -37,7 +37,7 @@
     "price": 2.967,
     "image": "/products/apple.avif",
     "unit": "2 lb",
-    "vendorId": 1
+    "vendorId": 3
   },
   {
     "id": 8,
@@ -45,6 +45,6 @@
     "price": 2.98,
     "image": "/products/apple.avif",
     "unit": "2 lb",
-    "vendorId": 1
+    "vendorId": 3
   }
 ]

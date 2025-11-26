@@ -8,17 +8,18 @@ import {
   useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
-import vendorsData from "@/data/vendors.json";
+import { client } from "@/lib/sanity";
 
 type User = {
-  id: number;
+  _id: string;
   name: string;
   email: string;
+  role?: string;
 };
 
 type AuthContextType = {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -30,32 +31,74 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Restore user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  const login = (email: string, password: string) => {
-    const foundUser = (vendorsData as any).find(
-      (u: any) => u.email === email && u.password === password
-    );
+  const login = async (email: string, password: string) => {
+    try {
+      // 1️⃣ Check localStorage first
+      if (typeof window !== "undefined") {
+        const storedVendor = localStorage.getItem("vendor");
+        if (storedVendor) {
+          const vendorData = JSON.parse(storedVendor);
+          if (vendorData.email === email && vendorData.password === password) {
+            setUser({ ...vendorData, role: "vendor" });
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ ...vendorData, role: "vendor" })
+            );
+            router.push("/vendor/dashboard");
+            return true;
+          }
+        }
+      }
 
-    if (foundUser) {
-      const { id, name, email: userEmail, role } = foundUser;
-      const userData = { id, name, email: userEmail, role };
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData)); // persist in localStorage
+      // 2️⃣ Otherwise query Sanity
+      const query = `*[_type == "vendor" && email == $email][0]{
+        _id,
+        name,
+        email,
+        password,
+        role
+      }`;
 
-      router.push("/vendor/dashboard"); // buyer redirect
-      return true;
+      const vendor: any = await client.fetch(query, { email });
+
+      if (vendor && vendor.password === password) {
+        const userData: User = {
+          _id: vendor._id,
+          name: vendor.name,
+          email: vendor.email,
+          role: vendor.role || "vendor",
+        };
+
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem(
+          "vendor",
+          JSON.stringify({ ...userData, password })
+        );
+
+        router.push("/vendor/dashboard");
+        return true;
+      }
+
+      return false;
+    } catch (err) {
+      console.error("Login error:", err);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user"); // clear storage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+      localStorage.removeItem("vendorSuccess");
+    }
     router.push("/login");
   };
 

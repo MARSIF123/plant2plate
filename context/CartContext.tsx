@@ -1,16 +1,17 @@
-// context/CartContext.tsx
 "use client";
+
 import { createContext, useContext, useState, ReactNode } from "react";
 
+// Cart keys are strings (_id)
 type CartType = {
-  [productId: number]: number;
+  [productId: string]: number;
 };
 
 type CartContextType = {
   cart: CartType;
-  addToCart: (id: number) => void;
-  removeFromCart: (id: number) => void;
-  changeQuantity: (id: number, delta: number) => void;
+  addToCart: (id: string) => void;
+  removeFromCart: (id: string) => void;
+  changeQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
 };
 
@@ -19,11 +20,11 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartType>({});
 
-  const addToCart = (id: number) => {
+  const addToCart = (id: string) => {
     setCart((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: string) => {
     setCart((prev) => {
       const newCart = { ...prev };
       delete newCart[id];
@@ -31,7 +32,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const changeQuantity = (id: number, delta: number) => {
+  const changeQuantity = (id: string, delta: number) => {
     setCart((prev) => {
       const newQty = (prev[id] || 0) + delta;
       if (newQty <= 0) {
@@ -54,11 +55,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Hook to use CartContext easily
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
+  if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 };

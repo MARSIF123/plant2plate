@@ -1,7 +1,9 @@
+"use client";
 import ProductGrid from "../../components/ProductGrid";
-import productsData from "@/data/products.json"; // JSON import
+import { useProducts } from "@/context/ProductContext"; // <- use ProductContext
 
 export default function ProductsPage() {
+  const { products: productsData } = useProducts(); // <- get products from context
   return (
     <main className="min-h-screen px-6 md:px-20 py-16">
       {/* Page Heading */}

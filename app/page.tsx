@@ -5,26 +5,29 @@ import Heading from "@/components/Heading";
 import ProductGrid from "@/components/ProductGrid";
 import SearchBar from "@/components/Search/SearchBar";
 import Slider from "@/components/Slider";
-import productsData from "@/data/products.json"; // JSON import
+import { useProducts } from "@/context/ProductContext"; // <- use ProductContext
 
 const Home = () => {
+  const { products } = useProducts(); // fetch products from Sanity via context
   const [search, setSearch] = useState("");
-  const [unitFilter, setUnitFilter] = useState(""); // optional unit filter
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]); // min-max
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
+  const [unitFilter, setUnitFilter] = useState(""); // optional if you still want it
 
   // Filter products based on search, unit, and price
   const filteredProducts = useMemo(() => {
-    return productsData.filter((product) => {
+    return products.filter((product) => {
       const matchesSearch = product.name
         .toLowerCase()
         .includes(search.toLowerCase());
-      const matchesUnit = unitFilter ? product.unit === unitFilter : true;
+      const matchesUnit = unitFilter
+        ? product.inStock.toString() === unitFilter
+        : true; // if you want inStock filter
       const matchesPrice =
         product.price >= priceRange[0] && product.price <= priceRange[1];
 
       return matchesSearch && matchesUnit && matchesPrice;
     });
-  }, [search, unitFilter, priceRange]);
+  }, [products, search, unitFilter, priceRange]);
 
   return (
     <div className="overflow-hidden padding-top-12vh z-10">
@@ -53,10 +56,10 @@ const Home = () => {
           onChange={(e) => setUnitFilter(e.target.value)}
           className="border px-4 py-2 rounded w-full md:w-1/4"
         >
-          <option value="">All Units</option>
-          <option value="2 lb">2 lb</option>
-          <option value="454 g">454 g</option>
-          <option value="1 kg">1 kg</option>
+          <option value="">All Stock</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
         </select>
 
         {/* Price Filter */}

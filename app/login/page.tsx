@@ -20,7 +20,7 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -29,12 +29,16 @@ export default function LoginPage() {
       return;
     }
 
-    const success = login(email, password);
-    if (!success) setError("Invalid email or password");
+    // Await the async login function
+    const success = await login(email, password);
+
+    if (!success) {
+      setError("Invalid email or password");
+    }
   };
 
   return (
-    <main className="max-w-md mx-auto p-6 mt-20 bg-white rounded-lg shadow-md">
+    <main className="max-w-md mx-auto p-6 mt-20 mb-20 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6">Vendor Login</h1>
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
@@ -60,7 +64,7 @@ export default function LoginPage() {
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
-          className="w-full bg-primary-green hover:bg-green-600 text-white py-2 rounded font-semibold"
+          className="w-full bg-primary-green hover:bg-green-600 text-white py-2 rounded font-semibold cursor-pointer transition-all hover:scale-105"
         >
           Login
         </button>

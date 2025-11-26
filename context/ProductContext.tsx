@@ -7,25 +7,35 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import productsData from "@/data/products.json"; // import JSON
-import type { Vendor } from "./VendorContext";
+import { client } from "@/lib/sanity";
+import type { SanityDocument } from "@sanity/client";
 
-// Product type
+// Full Product type
 export type Product = {
-  id: number;
+  _id: string;
   name: string;
+  slug: { current: string };
   price: number;
-  image: string;
-  unit: string;
-  vendorId: number;
+  inStock: number;
+  image: { asset: { _ref: string } };
+  vendor: { _ref: string };
+  category: { _ref: string };
+  description?: any[];
+  rating?: number;
+  tags?: string[];
 };
+
+// Type for creating a product (no _id yet)
+export type NewProduct = Omit<Product, "_id"> & { _type: "product" };
 
 // Context type
 type ProductContextType = {
   products: Product[];
-  getProductById: (id: number) => Product | undefined;
-  getProductsForVendor: (vendorId: number) => Product[];
-  addProduct: (product: Omit<Product, "id">) => Promise<Product>;
+  getProductById: (id: string) => Product | undefined;
+  getProductsForVendor: (vendorId: string) => Product[];
+  addProduct: (product: Omit<Product, "_id">) => Promise<Product>;
+  updateProduct: (id: string, product: Partial<Product>) => Promise<Product>;
+  deleteProduct: (id: string) => Promise<void>;
 };
 
 // Create context
@@ -34,41 +44,92 @@ const ProductContext = createContext<ProductContextType | undefined>(undefined);
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
 
-  // Load products from JSON on mount
+  // Fetch products from Sanity on mount
   useEffect(() => {
-    setProducts(productsData);
+    const fetchProducts = async () => {
+      const query = `*[_type == "product"]{
+        _id,
+        name,
+        price,
+        slug,
+        inStock,
+        image,
+        vendor,
+        category,
+        description,
+        rating,
+        tags
+      }`;
+      const data = await client.fetch<Product[]>(query);
+      setProducts(data);
+    };
+
+    fetchProducts();
   }, []);
 
-  const getProductById = (id: number) => products.find((p) => p.id === id);
+  const getProductById = (id: string) => products.find((p) => p._id === id);
 
-  const getProductsForVendor = (vendorId: number) =>
-    products.filter((p) => p.vendorId === vendorId);
-
-  // Add product via API
-  const addProduct = async (product: Omit<Product, "id">) => {
+  const getProductsForVendor = (vendorId: string) => {
+    return products.filter((p) => p.vendor._ref === vendorId);
+  };
+  // Add product
+  const addProduct = async (
+    product: Omit<Product, "_id">
+  ): Promise<Product> => {
     try {
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
+      const newProduct: Product = await client.create<NewProduct>({
+        _type: "product",
+        ...product,
       });
-
-      const data = await res.json();
-      if (data.success) {
-        setProducts((prev) => [...prev, data.product]);
-        return data.product;
-      } else {
-        throw new Error(data.error || "Failed to add product");
-      }
+      setProducts((prev) => [...prev, newProduct]);
+      return newProduct;
     } catch (err) {
-      console.error(err);
+      console.error("Error adding product:", err);
+      throw err;
+    }
+  };
+
+  // Update product
+  const updateProduct = async (
+    id: string,
+    product: Partial<Product>
+  ): Promise<Product> => {
+    try {
+      const updated: Product = await client
+        .patch(id)
+        .set(product)
+        .commit<Product>();
+      setProducts((prev) =>
+        prev.map((p) => (p._id === id ? { ...p, ...updated } : p))
+      );
+      return updated;
+    } catch (err) {
+      console.error("Error updating product:", err);
+      throw err;
+    }
+  };
+
+  // Delete product
+  const deleteProduct = async (id: string): Promise<void> => {
+    try {
+      await client.delete(id);
+      setProducts((prev) => prev.filter((p) => p._id !== id));
+    } catch (err) {
+      console.error("Error deleting product:", err);
       throw err;
     }
   };
 
   return (
     <ProductContext.Provider
-      value={{ products, getProductById, getProductsForVendor, addProduct }}
+      value={{
+        products,
+        getProductById,
+        getProductsForVendor,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+      }}
     >
       {children}
     </ProductContext.Provider>

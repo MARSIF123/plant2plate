@@ -12,21 +12,30 @@ export default function VendorDashboard() {
   const { getProductsForVendor } = useProducts();
   const [products, setProducts] = useState<Product[]>([]);
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
+  // Redirect if not logged in
   useEffect(() => {
-    if (!user) router.push("/login");
+    if (!user) {
+      router.push("/login");
+    } else {
+      setLoading(false);
+    }
   }, [user, router]);
 
+  // Load products once user is ready
   useEffect(() => {
-    if (user) {
-      const vendorProducts = getProductsForVendor(user.id);
-      setProducts(vendorProducts);
+    if (user?._id) {
+      const vendorProducts = getProductsForVendor(user._id);
+      setProducts(vendorProducts || []);
     }
   }, [user, getProductsForVendor]);
 
   const handleProductAdded = (product: Product) => {
     setProducts((prev) => [...prev, product]);
   };
+
+  if (loading) return <p className="p-8 text-center">Loading...</p>;
 
   return (
     <main className="min-h-screen p-8 bg-green-50">
@@ -38,16 +47,23 @@ export default function VendorDashboard() {
 
       <section>
         <h2 className="text-2xl font-semibold text-primary-green mb-4">
-          Your Products (Editable)
+          Your Products
         </h2>
-        <ProductEditGrid products={products} setProducts={setProducts} />
+        {products.length > 0 ? (
+          <ProductEditGrid products={products} setProducts={setProducts} />
+        ) : (
+          <p className="text-gray-500">You have no products yet.</p>
+        )}
       </section>
 
       <section className="mt-8">
         <h2 className="text-2xl font-semibold text-primary-green mb-4">
           Add New Product
         </h2>
-        <AddProductForm onProductAdded={handleProductAdded} />
+        <AddProductForm
+          onProductAdded={handleProductAdded}
+          defaultCategoryId="fruits"
+        />
       </section>
     </main>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Product, useProducts } from "@/context/ProductContext";
 import { FaTrash } from "react-icons/fa";
+import { urlFor } from "@/lib/sanity"; // Sanity image helper
 
 type ProductEditGridProps = {
   products: Product[];
@@ -13,12 +14,12 @@ export default function ProductEditGrid({
   products,
   setProducts,
 }: ProductEditGridProps) {
-  const { addProduct } = useProducts();
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const { addProduct, updateProduct, deleteProduct } = useProducts();
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editedProduct, setEditedProduct] = useState<Partial<Product>>({});
 
   const startEditing = (product: Product) => {
-    setEditingId(product.id);
+    setEditingId(product._id);
     setEditedProduct({ ...product });
   };
 
@@ -30,45 +31,32 @@ export default function ProductEditGrid({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditedProduct({
       ...editedProduct,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.type === "number" ? Number(e.target.value) : e.target.value,
     });
   };
 
   const saveProduct = async () => {
-    if (!editedProduct.id) return;
+    if (!editingId) return;
 
     try {
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editedProduct),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setProducts((prev) =>
-          prev.map((p) => (p.id === data.product.id ? data.product : p))
-        );
-        cancelEditing();
-      } else {
-        alert(data.error || "Failed to save product");
-      }
+      const updated = await updateProduct(editingId, editedProduct);
+      setProducts((prev) =>
+        prev.map((p) => (p._id === updated._id ? updated : p))
+      );
+      cancelEditing();
     } catch (err) {
       console.error(err);
       alert("Error saving product");
     }
   };
 
-  const deleteProduct = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const res = await fetch(`/api/products?id=${id}`, { method: "DELETE" });
-      const data = await res.json();
-      if (data.success) {
-        setProducts((prev) => prev.filter((p) => p.id !== id));
-      } else {
-        alert(data.error || "Failed to delete product");
-      }
+      await deleteProduct(id);
+      setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       console.error(err);
       alert("Error deleting product");
@@ -79,10 +67,10 @@ export default function ProductEditGrid({
     <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-6xl mx-auto p-4">
       {products.map((product) => (
         <div
-          key={product.id}
+          key={product._id}
           className="bg-white p-4 rounded-lg shadow-md flex flex-col gap-2"
         >
-          {editingId === product.id ? (
+          {editingId === product._id ? (
             <>
               <input
                 type="text"
@@ -102,19 +90,15 @@ export default function ProductEditGrid({
               />
               <input
                 type="text"
-                name="unit"
-                value={editedProduct.unit || ""}
-                onChange={handleChange}
-                className="border px-2 py-1 rounded"
-                placeholder="Unit"
-              />
-              <input
-                type="text"
                 name="image"
-                value={editedProduct.image || ""}
+                value={
+                  editedProduct.image
+                    ? editedProduct.image.asset?._ref || ""
+                    : ""
+                }
                 onChange={handleChange}
                 className="border px-2 py-1 rounded"
-                placeholder="Image URL"
+                placeholder="Image _ref"
               />
               <div className="flex gap-2 mt-2">
                 <button
@@ -134,14 +118,12 @@ export default function ProductEditGrid({
           ) : (
             <>
               <img
-                src={product.image}
+                src={product.image ? urlFor(product.image) : "/placeholder.png"}
                 alt={product.name}
                 className="w-full h-32 object-cover rounded"
               />
               <h3 className="font-semibold">{product.name}</h3>
-              <p>
-                ${product.price.toFixed(2)} {product.unit}
-              </p>
+              <p>${product.price.toFixed(2)}</p>
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => startEditing(product)}
@@ -150,7 +132,7 @@ export default function ProductEditGrid({
                   Edit
                 </button>
                 <button
-                  onClick={() => deleteProduct(product.id)}
+                  onClick={() => handleDelete(product._id)}
                   className="bg-red-600 text-white px-2 py-1 rounded flex items-center gap-1"
                 >
                   <FaTrash /> Delete

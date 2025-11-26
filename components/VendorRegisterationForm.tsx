@@ -3,9 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Confetti from "react-confetti";
+import { useVendors } from "@/context/VendorContext";
+import Link from "next/link";
 
 export default function VendorRegistrationForm() {
   const router = useRouter();
+  const { addVendor } = useVendors();
 
   const [form, setForm] = useState({
     name: "",
@@ -28,18 +31,20 @@ export default function VendorRegistrationForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "certificate" && e.target.files) {
       setForm({ ...form, certificate: e.target.files[0] });
-    } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
+      return;
     }
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
-    if (!form.name) newErrors.name = "Name is required";
-    if (!form.email) newErrors.email = "Email is required";
-    if (!form.password) newErrors.password = "Password is required";
-    if (!form.farmName) newErrors.farmName = "Farm name is required";
-    if (!form.farmAddress) newErrors.farmAddress = "Farm address is required";
+
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!form.email.trim()) newErrors.email = "Email is required";
+    if (!form.password.trim()) newErrors.password = "Password is required";
+    if (!form.farmName.trim()) newErrors.farmName = "Farm name is required";
+    if (!form.farmAddress.trim())
+      newErrors.farmAddress = "Farm address is required";
     if (!form.certificate) newErrors.certificate = "Certificate is required";
 
     setErrors(newErrors);
@@ -51,29 +56,22 @@ export default function VendorRegistrationForm() {
     if (!validate()) return;
 
     try {
-      const formData = new FormData();
-      formData.append("name", form.name);
-      formData.append("email", form.email);
-      formData.append("password", form.password);
-      formData.append("farmName", form.farmName);
-      formData.append("farmAddress", form.farmAddress);
-      if (form.certificate) formData.append("certificate", form.certificate);
+      localStorage.setItem("vendorSuccess", "true");
+      localStorage.setItem(
+        "vendor",
+        JSON.stringify({
+          name: form.name,
+          email: form.email,
+          farmName: form.farmName,
+          farmAddress: form.farmAddress,
+          password: form.password,
+        })
+      );
 
-      const res = await fetch("/api/vendors", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        localStorage.setItem("vendorSuccess", "true");
-        setSuccess(true);
-      } else {
-        alert(data.error || "Failed to register vendor");
-      }
+      setSuccess(true);
     } catch (err) {
-      console.error(err);
-      alert("Error submitting form");
+      console.error("Vendor registration error:", err);
+      alert("Failed to register vendor.");
     }
   };
 
@@ -109,7 +107,7 @@ export default function VendorRegistrationForm() {
           Vendor Registration
         </h1>
 
-        {/* Full Name */}
+        {/* Name */}
         <div>
           <label className="block text-sm font-medium mb-2">Full Name</label>
           <input
@@ -184,18 +182,47 @@ export default function VendorRegistrationForm() {
           )}
         </div>
 
-        {/* Certificate */}
+        {/* Certificate Upload */}
         <div>
-          <label className="block text-sm font-medium mb-2">Certificate</label>
+          <label className="block text-sm font-medium mb-2">
+            Upload Certificate
+          </label>
           <input
             name="certificate"
             type="file"
-            onChange={handleChange}
+            accept="image/*"
+            onChange={handleChange} // don't use value
             className="w-full border border-gray-300 px-4 py-3 rounded-lg"
           />
+          {form.certificate && (
+            <p className="text-green-600 text-sm mt-1">
+              Selected: {form.certificate.name}
+            </p>
+          )}
           {errors.certificate && (
             <p className="text-red-500 text-sm">{errors.certificate}</p>
           )}
+        </div>
+
+        {/* Terms & Vendor Requirements */}
+        <div className="mt-4 p-4 border-t border-gray-200 space-y-2">
+          <p className="text-gray-700 text-sm">
+            By registering, you agree to our terms and services.
+          </p>
+
+          <Link
+            href="/terms-and-services"
+            className="block text-lg font-semibold text-primary-green hover:underline mt-2"
+          >
+            Terms & Services
+          </Link>
+
+          <Link
+            href="/vendor-requirements"
+            className="block text-lg font-semibold text-primary-green hover:underline mt-1"
+          >
+            Vendor Requirements
+          </Link>
         </div>
 
         <button
