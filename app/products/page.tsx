@@ -1,5 +1,5 @@
 import ProductGrid from "../../components/ProductGrid";
-import { products } from "@/data/products"; // your static products array
+import productsData from "@/data/products.json"; // JSON import
 
 export default function ProductsPage() {
   return (
@@ -17,7 +17,7 @@ export default function ProductsPage() {
 
       {/* Products Grid */}
       <section>
-        <ProductGrid products={products} />
+        <ProductGrid products={productsData} />
       </section>
     </main>
   );
