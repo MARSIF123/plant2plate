@@ -7,10 +7,13 @@
     "farmName": "Green Valley",
     "farmAddress": "123 Farm Road",
     "certificate": "/certs/cert1.pdf",
-    "distance": 0,
-    "rating": 0,
-    "location": "Unknown",
-    "image": "/images/default-farm.jpg",
+    "distance": "3.2 km",
+    "rating": 4.7,
+    "location": {
+      "lat": 43.6532,
+      "lng": -79.3832
+    },
+    "image": "/images/slide1.jpg",
     "products": [],
     "description": "Organic farm specializing in fresh fruits."
   }

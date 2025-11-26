@@ -8,6 +8,7 @@ const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
 export default function VendorsPage() {
   const { vendors } = useVendors();
+  console.log("Vendors:", vendors);
 
   return (
     <main className="p-4 space-y-6">
