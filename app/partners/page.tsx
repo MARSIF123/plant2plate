@@ -43,7 +43,7 @@ export default function VendorsPage() {
                 className="w-16 h-16 rounded-lg object-cover"
               />
               <div>
-                <h2 className="text-lg font-semibold">{vendor.name}</h2>
+                <h2 className="text-lg font-semibold">{vendor.farmName}</h2>
                 {vendor.distance !== undefined &&
                   vendor.rating !== undefined && (
                     <p className="text-gray-500">
